@@ -39,15 +39,19 @@ jobs:
       # Start Kubernetes cluster
       - name: Start Minikube
         run: |
-          minikube start --driver=docker
+          minikube start --driver=docker --wait=all
 
-      # Verify cluster
+      # Wait for cluster and verify
       - name: Check cluster
-        run: kubectl get nodes
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl get pods --all-namespaces
 
       - name: Terraform Init
         run: |
           rm -f terraform.tfstate*
+          minikube update-context
           terraform init
 
       - name: Terraform Validate
