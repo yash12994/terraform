@@ -46,7 +46,9 @@ jobs:
         run: kubectl get nodes
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          rm -f terraform.tfstate*
+          terraform init
 
       - name: Terraform Validate
         run: terraform validate
