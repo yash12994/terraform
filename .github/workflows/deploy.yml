@@ -21,26 +21,12 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+      
+      - name: Set kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
+          export KUBECONFIG=kubeconfig
 
 
 
-Add Kubernetes Config to GitHub
 
-On your VM:
-
-cat ~/.kube/config
-
-Copy it.
-
-In GitHub:
-Go to Settings → Secrets
-Add:
-KUBE_CONFIG
-
-Paste config
-add this in kubernetes deploy file
-
-- name: Set kubeconfig
-  run: |
-    echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
-    export KUBECONFIG=kubeconfig
