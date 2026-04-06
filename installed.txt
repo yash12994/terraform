@@ -187,3 +187,8 @@ add this in kubernetes deploy file
   run: |
     echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
     export KUBECONFIG=kubeconfig
+
+
+Enter the pods
+
+kubectl exec -it mongodb-d66877d5b-88sc7 -n demo-ns -- bash

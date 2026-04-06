@@ -1,0 +1,46 @@
+name: Terraform Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+
+
+Add Kubernetes Config to GitHub
+
+On your VM:
+
+cat ~/.kube/config
+
+Copy it.
+
+In GitHub:
+Go to Settings → Secrets
+Add:
+KUBE_CONFIG
+
+Paste config
+add this in kubernetes deploy file
+
+- name: Set kubeconfig
+  run: |
+    echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
+    export KUBECONFIG=kubeconfig
