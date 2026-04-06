@@ -23,13 +23,12 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
-      # Install Docker
-      - name: Install Docker
+      # Install Docker (already available in ubuntu-latest, but ensure it's usable)
+      - name: Setup Docker
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo systemctl start docker
-          sudo usermod -aG docker $USER
+          # Docker is pre-installed, just ensure it's accessible
+          docker --version
 
       # Install Minikube
       - name: Install Minikube
