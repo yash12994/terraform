@@ -1,5 +1,5 @@
 provider "kubernetes" {
-  # Leave kubeconfig path unset so the provider uses KUBECONFIG from the environment.
+  config_path = "~/.kube/config"
 }
 
 resource "kubernetes_namespace" "demo" {
