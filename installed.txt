@@ -1,0 +1,189 @@
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl wget git unzip apt-transport-https ca-certificates gnupg lsb-release
+
+Install Docker
+sudo apt install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker --version
+
+Install minikube 
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+start minikube
+minikube start --driver=docker
+
+kubectl get nodes
+
+Install Terraform 
+
+wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip
+
+unzip terraform_1.6.6_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
+
+terraform -version
+
+Install MongoDB
+
+curl -fsSL https://pgp.mongodb.com/server-7.0.asc | \
+sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+--dearmor
+
+echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | \
+sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+sudo apt update
+
+sudo apt install -y mongodb-org
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+check:
+
+mongosh
+
+TerraformKubernetes
+
+nano main.tf
+
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+
+resource "kubernetes_namespace" "demo" {
+  metadata {
+    name = "demo-ns"
+  }
+}
+
+resource "kubernetes_deployment" "mongodb" {
+  metadata {
+    name = "mongodb"
+    namespace = kubernetes_namespace.demo.metadata[0].name
+  }
+
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        app = "mongodb"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "mongodb"
+        }
+      }
+
+      spec {
+        container {
+          image = "mongo:latest"
+          name  = "mongodb"
+
+          port {
+            container_port = 27017
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_service" "mongodb_service" {
+  metadata {
+    name = "mongodb-service"
+    namespace = kubernetes_namespace.demo.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "mongodb"
+    }
+
+    port {
+      port        = 27017
+      target_port = 27017
+    }
+
+    type = "NodePort"
+  }
+}
+
+run terraform
+
+terraform init
+terraform apply -auto-approve
+
+check 
+kubectl get all -n demo-ns
+
+CI/CD using GitHub Actions
+Create rep
+git init
+git add .
+git commit -m "initial"
+
+mkdir -p .github/workflows
+nano .github/workflows/deploy.yml
+
+deploy.yml
+name: Terraform Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+
+
+Add Kubernetes Config to GitHub
+
+On your VM:
+
+cat ~/.kube/config
+
+Copy it.
+
+In GitHub:
+Go to Settings → Secrets
+Add:
+KUBE_CONFIG
+
+Paste config
+add this in kubernetes deploy file
+
+- name: Set kubeconfig
+  run: |
+    echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
+    export KUBECONFIG=kubeconfig

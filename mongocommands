@@ -1,0 +1,19 @@
+MongoCommands
+
+use btechDB
+Insert data
+db.stories.insertOne({
+  name: "Yash",
+  year: "2nd Year",
+  achievement: "Built Kubernetes + Terraform project"
+})
+Insert multiple
+db.stories.insertMany([
+  {name:"Yash", story:"Learned Docker"},
+  {name:"Yash", story:"Worked on CI/CD"},
+  {name:"Yash", story:"Completed Mini Project"}
+])
+View
+db.stories.find().pretty()
+Delete
+db.stories.deleteOne({name:"Yash"})
